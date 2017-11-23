@@ -497,11 +497,11 @@ namespace ts {
                         return undefined;
                     }
                 },
-                createHash: _crypto && ((data: string) => {
+                createHash: !_crypto ? calculateContentHash : (data) => {
                     const hash = _crypto.createHash("md5");
                     hash.update(data);
                     return hash.digest("hex");
-                }),
+                },
                 getMemoryUsage() {
                     if (global.gc) {
                         global.gc();
@@ -574,6 +574,17 @@ namespace ts {
                 realpath
             };
         }
+
+        function calculateContentHash(data: string): string {
+            if (!data) return 'null';
+            var hash = 0;
+            for (var i = 0; i < data.length - 1; i++) {
+                var char = data.charCodeAt(i);
+                hash = (((hash << 5) - hash) + char) | 0;
+            }
+            return Math.abs(hash).toString(16);
+        }
+
 
         function recursiveCreateDirectory(directoryPath: string, sys: System) {
             const basePath = getDirectoryPath(directoryPath);
